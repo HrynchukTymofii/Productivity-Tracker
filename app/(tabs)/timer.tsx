@@ -11,24 +11,20 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
-import { useTheme } from '../contexts/ThemeContext';
-import { useLanguage } from '../contexts/LanguageContext';
-import { useTimer } from '../contexts/TimerContext';
-import { TaskItem } from '../components/timer/TaskItem';
-import { EmptyState } from '../components/ui/EmptyState';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
-import { TimerDisplay } from '../components/timer/TimerDisplay';
-import { RootStackParamList } from '../types';
+import { useTheme } from '../../src/contexts/ThemeContext';
+import { useLanguage } from '../../src/contexts/LanguageContext';
+import { useTimer } from '../../src/contexts/TimerContext';
+import { TaskItem } from '../../src/components/timer/TaskItem';
+import { EmptyState } from '../../src/components/ui/EmptyState';
+import { Button } from '../../src/components/ui/Button';
+import { Card } from '../../src/components/ui/Card';
+import { TimerDisplay } from '../../src/components/timer/TimerDisplay';
 
-type TimerScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
-export const TimerScreen: React.FC = () => {
-  const navigation = useNavigation<TimerScreenNavigationProp>();
+export default function TimerScreen() {
+  const router = useRouter();
   const { theme } = useTheme();
   const { t } = useLanguage();
   const { tasks, createTask, timerState, activeTask } = useTimer();
@@ -51,9 +47,12 @@ export const TimerScreen: React.FC = () => {
 
   const handleOpenFullScreen = () => {
     if (activeTask) {
-      navigation.navigate('FullScreenTimer', {
-        taskId: activeTask.id,
-        taskName: activeTask.task_name,
+      router.push({
+        pathname: '/full-screen-timer',
+        params: {
+          taskId: activeTask.id,
+          taskName: activeTask.task_name,
+        },
       });
     }
   };
@@ -216,7 +215,7 @@ export const TimerScreen: React.FC = () => {
       </Modal>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
