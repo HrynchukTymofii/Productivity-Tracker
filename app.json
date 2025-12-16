@@ -3,6 +3,7 @@
     "name": "Productivity Tracker",
     "slug": "productivity-tracker",
     "version": "1.0.0",
+    "scheme": "productivity-tracker",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -26,9 +27,11 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     },
     "plugins": [
+      "expo-router",
       [
         "expo-screen-orientation",
         {

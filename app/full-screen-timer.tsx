@@ -5,30 +5,24 @@ import {
   StyleSheet,
   TouchableOpacity,
   StatusBar,
-  Dimensions,
 } from 'react-native';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import * as Haptics from 'expo-haptics';
-import { useTheme } from '../contexts/ThemeContext';
-import { useLanguage } from '../contexts/LanguageContext';
-import { useTimer } from '../contexts/TimerContext';
-import { formatTime } from '../utils/timeFormatter';
-import { RootStackParamList } from '../types';
+import { useTheme } from '../src/contexts/ThemeContext';
+import { useLanguage } from '../src/contexts/LanguageContext';
+import { useTimer } from '../src/contexts/TimerContext';
+import { formatTime } from '../src/utils/timeFormatter';
 
-type FullScreenTimerRouteProp = RouteProp<RootStackParamList, 'FullScreenTimer'>;
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-export const FullScreenTimerScreen: React.FC = () => {
-  const navigation = useNavigation();
-  const route = useRoute<FullScreenTimerRouteProp>();
+export default function FullScreenTimerScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams<{ taskId: string; taskName: string }>();
   const { theme } = useTheme();
   const { t } = useLanguage();
   const { timerState, pauseTimer, resumeTimer, stopTimer, activeTask } = useTimer();
 
-  const { taskName } = route.params;
+  const taskName = params.taskName || '';
 
   useEffect(() => {
     // Lock to landscape orientation
@@ -58,11 +52,11 @@ export const FullScreenTimerScreen: React.FC = () => {
   const handleStop = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     await stopTimer();
-    navigation.goBack();
+    router.back();
   };
 
   const handleClose = () => {
-    navigation.goBack();
+    router.back();
   };
 
   const isPaused = timerState.isPaused;
@@ -134,7 +128,7 @@ export const FullScreenTimerScreen: React.FC = () => {
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
