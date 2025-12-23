@@ -1,12 +1,14 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/contexts/ThemeContext';
-import { useLanguage } from '../../src/contexts/LanguageContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export default function TabLayout() {
   const { theme } = useTheme();
   const { t } = useLanguage();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
@@ -15,9 +17,9 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: theme.colors.card,
           borderTopColor: theme.colors.border,
-          height: 85,
-          paddingBottom: 20,
-          paddingTop: 10,
+          height: 70 + insets.bottom,
+          paddingBottom: insets.bottom > 0 ? insets.bottom + 10 : 10,
+          paddingTop: 8,
         },
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.placeholder,
@@ -26,14 +28,14 @@ export default function TabLayout() {
           fontWeight: '500',
         },
       }}
-    >
+    > 
       <Tabs.Screen
         name="index"
         options={{
-          tabBarLabel: t('tabs.today'),
+          tabBarLabel: t('tabs.timer'),
           tabBarIcon: ({ focused, color, size }) => (
             <Ionicons
-              name={focused ? 'calendar' : 'calendar-outline'}
+              name={focused ? 'timer' : 'timer-outline'}
               size={size}
               color={color}
             />
@@ -41,12 +43,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="timer"
+        name="today"
         options={{
-          tabBarLabel: t('tabs.timer'),
+          tabBarLabel: t('tabs.today'),
           tabBarIcon: ({ focused, color, size }) => (
             <Ionicons
-              name={focused ? 'timer' : 'timer-outline'}
+              name={focused ? 'calendar' : 'calendar-outline'}
               size={size}
               color={color}
             />

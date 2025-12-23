@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { initializeDatabase } from '../src/database/schema';
-import { ThemeProvider, useTheme } from '../src/contexts/ThemeContext';
-import { LanguageProvider } from '../src/contexts/LanguageContext';
-import { TimerProvider } from '../src/contexts/TimerContext';
-import { Loading } from '../src/components/ui/Loading';
+import { initializeDatabase } from '../database/schema';
+import { ThemeProvider, useTheme } from '../contexts/ThemeContext';
+import { LanguageProvider } from '../contexts/LanguageContext';
+import { TimerProvider } from '../contexts/TimerContext';
+import { PomodoroProvider } from '../contexts/PomodoroContext';
 
 function RootLayoutNav() {
   const { theme, isDarkMode } = useTheme();
@@ -26,6 +27,13 @@ function RootLayoutNav() {
           options={{
             presentation: 'fullScreenModal',
             animation: 'fade',
+          }}
+        />
+        <Stack.Screen
+          name="pomodoro"
+          options={{
+            presentation: 'modal',
+            animation: 'slide_from_bottom',
           }}
         />
       </Stack>
@@ -52,7 +60,12 @@ export default function RootLayout() {
   }, []);
 
   if (!isDbReady) {
-    return <Loading fullScreen message="Initializing..." />;
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#3498DB" />
+        <Text style={styles.loadingText}>Initializing...</Text>
+      </View>
+    );
   }
 
   return (
@@ -60,10 +73,26 @@ export default function RootLayout() {
       <ThemeProvider>
         <LanguageProvider>
           <TimerProvider>
-            <RootLayoutNav />
+            <PomodoroProvider>
+              <RootLayoutNav />
+            </PomodoroProvider>
           </TimerProvider>
         </LanguageProvider>
       </ThemeProvider>
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666666',
+  },
+});

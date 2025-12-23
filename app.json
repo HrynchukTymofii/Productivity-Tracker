@@ -2,7 +2,7 @@
   "expo": {
     "name": "Productivity Tracker",
     "slug": "productivity-tracker",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "scheme": "productivity-tracker",
     "orientation": "default",
     "icon": "./assets/icon.png",
@@ -15,14 +15,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.productivitytracker.app"
+      "bundleIdentifier": "com.hrynchuk.productivitytracker"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#3498DB"
       },
-      "package": "com.productivitytracker.app",
+      "package": "com.hrynchuk.productivitytracker",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
@@ -37,7 +37,14 @@
         {
           "initialOrientation": "DEFAULT"
         }
-      ]
-    ]
+      ],
+      "expo-font"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "78953c62-9899-4452-94e4-1586ebbd79e6"
+      }
+    }
   }
 }

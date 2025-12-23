@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,17 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import * as Haptics from 'expo-haptics';
-import { useTheme } from '../src/contexts/ThemeContext';
-import { useLanguage } from '../src/contexts/LanguageContext';
-import { useTimer } from '../src/contexts/TimerContext';
-import { formatTime } from '../src/utils/timeFormatter';
+import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useTimer } from '../contexts/TimerContext';
+import { formatTime } from '../utils/timeFormatter';
+import { FlipClock } from '../components/timer/FlipClock';
+
+type TimerStyle = 'digital' | 'flip';
 
 export default function FullScreenTimerScreen() {
   const router = useRouter();
@@ -21,8 +26,15 @@ export default function FullScreenTimerScreen() {
   const { theme } = useTheme();
   const { t } = useLanguage();
   const { timerState, pauseTimer, resumeTimer, stopTimer, activeTask } = useTimer();
+  const insets = useSafeAreaInsets();
 
   const taskName = params.taskName || '';
+  const [timerStyle, setTimerStyle] = useState<TimerStyle>('digital');
+
+  const toggleTimerStyle = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setTimerStyle(prev => prev === 'digital' ? 'flip' : 'digital');
+  };
 
   useEffect(() => {
     // Lock to landscape orientation
@@ -63,13 +75,57 @@ export default function FullScreenTimerScreen() {
   const taskColor = activeTask?.color || theme.colors.primary;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[
+      styles.container,
+      {
+        backgroundColor: theme.colors.background,
+        paddingLeft: insets.left + 16,
+        paddingRight: insets.right + 16,
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+      }
+    ]}>
       <StatusBar hidden />
 
       {/* Close Button */}
-      <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+      <TouchableOpacity
+        style={[styles.closeButton, { top: insets.top + 16, right: insets.right + 16 }]}
+        onPress={handleClose}
+      >
         <Ionicons name="close" size={32} color={theme.colors.textSecondary} />
       </TouchableOpacity>
+
+      {/* Timer Style Toggle */}
+      <View style={[styles.toggleContainer, { top: insets.top + 16, left: insets.left + 16 }]}>
+        <TouchableOpacity
+          style={[
+            styles.toggleButton,
+            timerStyle === 'digital' && { backgroundColor: theme.colors.primary },
+            { borderTopLeftRadius: 8, borderBottomLeftRadius: 8 },
+          ]}
+          onPress={() => timerStyle !== 'digital' && toggleTimerStyle()}
+        >
+          <Ionicons
+            name="text"
+            size={20}
+            color={timerStyle === 'digital' ? '#FFF' : theme.colors.textSecondary}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.toggleButton,
+            timerStyle === 'flip' && { backgroundColor: theme.colors.primary },
+            { borderTopRightRadius: 8, borderBottomRightRadius: 8 },
+          ]}
+          onPress={() => timerStyle !== 'flip' && toggleTimerStyle()}
+        >
+          <Ionicons
+            name="albums"
+            size={20}
+            color={timerStyle === 'flip' ? '#FFF' : theme.colors.textSecondary}
+          />
+        </TouchableOpacity>
+      </View>
 
       {/* Main Content */}
       <View style={styles.content}>
@@ -83,16 +139,26 @@ export default function FullScreenTimerScreen() {
 
         {/* Timer Display */}
         <View style={styles.timerContainer}>
-          <Text
-            style={[
-              styles.timer,
-              {
-                color: isPaused ? theme.colors.warning : theme.colors.text,
-              },
-            ]}
-          >
-            {formatTime(timerState.elapsedSeconds)}
-          </Text>
+          {timerStyle === 'digital' ? (
+            <Text
+              style={[
+                styles.timer,
+                {
+                  color: isPaused ? theme.colors.warning : theme.colors.text,
+                },
+              ]}
+            >
+              {formatTime(timerState.elapsedSeconds)}
+            </Text>
+          ) : (
+            <FlipClock
+              seconds={timerState.elapsedSeconds}
+              textColor={isPaused ? theme.colors.warning : '#FFFFFF'}
+              backgroundColor={theme.dark ? '#2a2a3e' : '#1a1a2e'}
+              separatorColor={isPaused ? theme.colors.warning : theme.colors.text}
+              size="large"
+            />
+          )}
           {isPaused && (
             <Text style={[styles.pausedLabel, { color: theme.colors.warning }]}>
               {t('fullScreenTimer.paused')}
@@ -104,25 +170,52 @@ export default function FullScreenTimerScreen() {
         <View style={styles.controls}>
           {isPaused ? (
             <TouchableOpacity
-              style={[styles.controlButton, { backgroundColor: theme.colors.success }]}
+              style={styles.controlButtonOuter}
               onPress={handleResume}
+              activeOpacity={0.8}
             >
-              <Ionicons name="play" size={48} color="#FFF" />
+              <LinearGradient
+                colors={['#5cd85c', '#2ecc71', '#27ae60']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={styles.controlButton}
+              >
+                <View style={styles.glassOverlay} />
+                <Ionicons name="play" size={32} color="#FFF" />
+              </LinearGradient>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              style={[styles.controlButton, { backgroundColor: theme.colors.warning }]}
+              style={styles.controlButtonOuter}
               onPress={handlePause}
+              activeOpacity={0.8}
             >
-              <Ionicons name="pause" size={48} color="#FFF" />
+              <LinearGradient
+                colors={['#f9ca24', '#f39c12', '#e67e22']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={styles.controlButton}
+              >
+                <View style={styles.glassOverlay} />
+                <Ionicons name="pause" size={32} color="#FFF" />
+              </LinearGradient>
             </TouchableOpacity>
           )}
 
           <TouchableOpacity
-            style={[styles.controlButton, { backgroundColor: theme.colors.error }]}
+            style={styles.controlButtonOuter}
             onPress={handleStop}
+            activeOpacity={0.8}
           >
-            <Ionicons name="stop" size={48} color="#FFF" />
+            <LinearGradient
+              colors={['#ff6b6b', '#ee5a5a', '#c0392b']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.controlButton}
+            >
+              <View style={styles.glassOverlay} />
+              <Ionicons name="stop" size={32} color="#FFF" />
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       </View>
@@ -144,6 +237,17 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: 'rgba(0,0,0,0.1)',
   },
+  toggleContainer: {
+    position: 'absolute',
+    zIndex: 10,
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    borderRadius: 8,
+  },
+  toggleButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
   content: {
     flex: 1,
     alignItems: 'center',
@@ -158,36 +262,52 @@ const styles = StyleSheet.create({
   },
   timerContainer: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: 32,
   },
   timer: {
     fontSize: 120,
-    fontWeight: '200',
+    fontWeight: '700',
     fontVariant: ['tabular-nums'],
     letterSpacing: 4,
   },
   pausedLabel: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '600',
     marginTop: 8,
     letterSpacing: 2,
+    position: 'absolute',
+    bottom: -32,
   },
   controls: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  controlButtonOuter: {
+    marginHorizontal: 16,
+    borderRadius: 35,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 15,
+  },
   controlButton: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
+    overflow: 'hidden',
+  },
+  glassOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '45%',
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    borderTopLeftRadius: 35,
+    borderTopRightRadius: 35,
   },
 });

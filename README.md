@@ -161,11 +161,11 @@ npx expo start
 
 ## Adding New Languages
 
-1. Create a new JSON file in `/src/locales/` (e.g., `sv.json` for Swedish)
+1. Create a new JSON file in `locales/` (e.g., `sv.json` for Swedish)
 
 2. Copy the structure from `en.json` and translate all strings
 
-3. Add the language to `/src/constants/languages.ts`:
+3. Add the language to `/constants/languages.ts`:
 ```typescript
 {
   code: 'sv',
@@ -176,7 +176,7 @@ npx expo start
 }
 ```
 
-4. Import and add to `LanguageContext.tsx`:
+1. Import and add to `LanguageContext.tsx`:
 ```typescript
 import sv from '../locales/sv.json';
 
@@ -186,7 +186,7 @@ sv: { translation: sv },
 
 ## Adding New Color Palettes
 
-Add to `/src/constants/colors.ts`:
+Add to `/constants/colors.ts`:
 
 ```typescript
 {
